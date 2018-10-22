@@ -65,9 +65,12 @@ class Bloxorz:
             print(self.board[y])
 
     def checkTheTile(self, x, y):
+        #index out of range error
 
         if self.board[y][x] == "X":
             return False
+        elif self.board[y][x] == "G" and self.player.state == 0:
+            print("Goal")
         else:
             return True
 
@@ -94,7 +97,6 @@ class Bloxorz:
         cleanBoard = list(self.board[self.player.currentPoint[1]])
         cleanBoard2 = list(self.board[self.player.currentPoint2[1]])
         cleanBoard3 = list(self.board[self.goalPoint[1]])
-
 
         cleanBoard[self.player.currentPoint[0]] = "S"
         cleanBoard2[self.player.currentPoint2[0]] = "S"
@@ -179,7 +181,6 @@ class Bloxorz:
                 if self.checkTheTile(x1, y1):
                     if self.checkTheTile(x2, y2):
                         result = [[x1, y1], [x2, y2], 0]
-
 
         elif self.player.state == 2:  # horizontal 2
             if direction == "U" or direction == "D":  # player state will be 1
@@ -271,7 +272,7 @@ class Bloxorz:
             # check up
             if self.checkTheTile(coor1x, coor1y - 1):
                 if self.checkTheTile(coor2x, coor2y - 2):
-                    result.append([[coor1x, coor1y-1], [coor2x, coor2y-2], 2])
+                    result.append([[coor1x, coor1y - 1], [coor2x, coor2y - 2], 2])
 
             # check down
             if self.checkTheTile(coor1x, coor1y + 1):
@@ -288,7 +289,7 @@ class Bloxorz:
                 if self.checkTheTile(coor2x + 2, coor2y):
                     result.append([[coor1x + 1, coor1y], [coor2x + 2, coor2y], 1])
 
-        elif current[2] == 1: # state = 1
+        elif current[2] == 1:  # state = 1
             # check up
             if self.checkTheTile(coor1x, coor1y - 1):
                 if self.checkTheTile(coor2x, coor2y - 1):
@@ -319,7 +320,6 @@ class Bloxorz:
             if self.checkTheTile(coor1x, coor1y + 1):
                 if self.checkTheTile(coor2x, coor2y + 2):
                     result.append([[coor1x, coor1y + 1], [coor2x, coor2y + 2], 0])
-
             # check left
             if self.checkTheTile(coor1x - 1, coor1y):
                 if self.checkTheTile(coor2x - 1, coor2y):
@@ -329,6 +329,8 @@ class Bloxorz:
             if self.checkTheTile(coor1x + 1, coor1y):
                 if self.checkTheTile(coor2x + 1, coor2y):
                     result.append([[coor1x + 1, coor1y], [coor2x + 1, coor2y], 2])
+
+        if current[0] == self.goalPoint and current[1] == self.goalPoint:
         print(result)
         return result
 
@@ -350,7 +352,7 @@ class Bloxorz:
         while not queue.empty():
             current = queue.get()
 
-            if current == goal :
+            if current == goal:
                 print("Finished")
                 self.printBoard()
                 break
@@ -369,5 +371,5 @@ class Bloxorz:
                     visited.append(str(next))
                     print()
                     self.clearOldPoints()
-                    self.player.updatePlayer(next[0],next[1],next[2])
+                    self.player.updatePlayer(next[0], next[1], next[2])
                     self.placeNewPoints()
