@@ -13,7 +13,7 @@ class Bloxorz:
         self.xLen = len(self.board[0])  # length of x
         self.yLen = len(self.board)  # length of y
         self.startingState = 0
-
+        self.goalPoint = []
     def findStart(self):
 
         counter = 0
@@ -27,8 +27,6 @@ class Bloxorz:
 
         self.goalPoint = [goalX, goalY]  # goal coordinate
 
-        print("Goal Point: ", self.goalPoint)
-
         for y in range(0, self.yLen):  # determine the block coordinate
             for x in range(0, self.xLen):
                 if self.board[y][x] == "S":
@@ -41,24 +39,14 @@ class Bloxorz:
 
                         counter += 1
 
-        print()
-
         if counter == 1:
             self.blockPoint2 = self.blockPoint
             self.player = Block.Player(self.blockPoint, self.blockPoint2, 0)  # state 1 vertical
-            print("Player Coordinates: ", self.blockPoint)
-            print("Vertical")
-
         elif counter == 2:
             if self.blockPoint[0] != self.blockPoint2[0]:
                 self.player = Block.Player(self.blockPoint, self.blockPoint2, 1)  # state 1 horizontal
-                print("Player Coordinates: ", self.blockPoint, self.blockPoint2)
-                print("Horizontal and Parallel to X")
-
             else:
                 self.player = Block.Player(self.blockPoint, self.blockPoint2, 2)  # state 2 horizontal
-                print("Player Coordinates: ", self.blockPoint, self.blockPoint2)
-                print("Horizontal and Parallel to Y")
 
     def printBoard(self):
 
@@ -204,22 +192,10 @@ class Bloxorz:
         self.printBoard()
 
     def UCS(self):
-
-        print("---------------")
-        self.findStart()
-        print()
-        print("Starting...")
-        print()
-        self.checkState()
-        self.printBoard()
-        print("---------------")
-        print("---------------")
-        print("---------------")
-
         q = PriorityQueue()
         goal = [self.goalPoint, self.goalPoint, 0]
         start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
-        visited = {str(start): 0}
+        visited = {}
         totalCost = {str(start): 0}
         counter = 0
 
@@ -229,12 +205,14 @@ class Bloxorz:
 
             if current == goal:
                 print("Solved in :", totalCost[str(goal)], "moves with UCS Algorithm.")
-                print("Current Board")
                 print()
-                self.updateBoard(goal[0], goal[1], goal[2])
-                print("Total Node: ", counter)
-                print("Finished")
-                break
+                path = []
+                while current != start:
+                    path.append(current)
+                    current = visited[str(current)]
+                path.append(start)
+                path.reverse()
+                return path
 
             for next in self.neighbors(current):
                 newCost = totalCost[str(current)] + 1
@@ -242,8 +220,7 @@ class Bloxorz:
                     totalCost[str(next)] = newCost
                     priority = newCost
                     q.put(next, priority)
-                    crt = str(next)
-                    visited[crt] = priority
+                    visited[str(next)] = current
                     counter +=1
 
 
@@ -256,7 +233,7 @@ class Bloxorz:
         if next[2] == 0:
             distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
             return distance-1
-        elif next[2] ==1:
+        elif next[2] == 1:
             if self.goalPoint[0]-next1x < self.goalPoint[0]-next2x:
                 distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
                 return distance-1
@@ -272,14 +249,10 @@ class Bloxorz:
                 return distance-1
 
     def Astar(self):
-        print("---------------")
-        self.findStart()
-        self.checkState()
-        print()
         q = PriorityQueue()
         goal = [self.goalPoint, self.goalPoint, 0]
         start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
-        visited = [str(start)]
+        visited = {}
         totalCost = {str(start): 0}
         counter = 0
 
@@ -289,13 +262,15 @@ class Bloxorz:
 
             if current == goal:
                 print("Solved in :", totalCost[str(goal)], "moves with A* Algorithm.")
-                print("Current Board")
                 print()
-                self.updateBoard(goal[0], goal[1], goal[2])
-                print()
-                print("Finished")
-                print("Total Node: ", counter)
-                break
+
+                path = []
+                while current != start:
+                    path.append(current)
+                    current = visited[str(current)]
+                path.append(start)
+                path.reverse()
+                return path
 
             for next in self.neighbors(current):
 
@@ -305,6 +280,18 @@ class Bloxorz:
                     totalCost[str(next)] = newCost
                     priority = newCost + self.heuristic(next)
                     q.put(next, priority)
-                    crt = str(current)
-                    visited.append(crt)
+                    visited[str(next)] = current
                     counter += 1
+
+    def solution(self, path):
+        counter = 0
+        for movement in path:
+            if counter == 0:
+                print("Starting Position, Action: ", counter)
+            else:
+                print("Action: ", counter)
+            self.updateBoard(movement[0], movement[1], movement[2])
+            counter += 1
+            print()
+
+        print("Done")
