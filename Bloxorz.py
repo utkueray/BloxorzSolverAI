@@ -2,6 +2,7 @@
 import Block
 from queue import PriorityQueue
 import math
+import time
 
 class Bloxorz:
 
@@ -212,12 +213,15 @@ class Bloxorz:
         self.checkState()
         self.printBoard()
         print("---------------")
+        print("---------------")
+        print("---------------")
 
         q = PriorityQueue()
         goal = [self.goalPoint, self.goalPoint, 0]
         start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
-        visited = [str(start)]
+        visited = {str(start): 0}
         totalCost = {str(start): 0}
+        counter = 0
 
         q.put(start, 0)  # start, total cost
         while not q.empty():
@@ -228,7 +232,7 @@ class Bloxorz:
                 print("Current Board")
                 print()
                 self.updateBoard(goal[0], goal[1], goal[2])
-                print()
+                print("Total Node: ", counter)
                 print("Finished")
                 break
 
@@ -238,38 +242,46 @@ class Bloxorz:
                     totalCost[str(next)] = newCost
                     priority = newCost
                     q.put(next, priority)
-                    crt = str(current)
-                    visited.append(crt)
+                    crt = str(next)
+                    visited[crt] = priority
+                    counter +=1
+
 
     def heuristic(self, next):
         next1x = next[0][0]
         next1y = next[0][1]
         next2x = next[1][0]
         next2y = next[1][1]
-        distance1 = math.sqrt(math.pow((self.goalPoint[0] - next1x), 2) + math.pow(int((self.goalPoint[1] - next1y)), 2))
-        distance2 = math.sqrt(math.pow((self.goalPoint[0] - next2x), 2) + math.pow(int((self.goalPoint[1] - next2y)), 2))
 
-        if distance1 <= distance2:
-            return int(distance1 -1.5)
-        else:
-            return int(distance2 -1.5)
+        if next[2] == 0:
+            distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
+            return distance-1
+        elif next[2] ==1:
+            if self.goalPoint[0]-next1x < self.goalPoint[0]-next2x:
+                distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
+                return distance-1
+            else:
+                distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
+                return distance-1
+        elif next[2] == 2:
+            if self.goalPoint[1]-next1y < self.goalPoint[1]-next2y:
+                distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
+                return distance-1
+            else:
+                distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
+                return distance-1
 
     def Astar(self):
-
         print("---------------")
         self.findStart()
-        print()
-        print("Starting...")
-        print()
         self.checkState()
-        self.printBoard()
-        print("---------------")
-
+        print()
         q = PriorityQueue()
         goal = [self.goalPoint, self.goalPoint, 0]
         start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
         visited = [str(start)]
         totalCost = {str(start): 0}
+        counter = 0
 
         q.put(start, 0)  # start, total cost
         while not q.empty():
@@ -282,6 +294,7 @@ class Bloxorz:
                 self.updateBoard(goal[0], goal[1], goal[2])
                 print()
                 print("Finished")
+                print("Total Node: ", counter)
                 break
 
             for next in self.neighbors(current):
@@ -289,8 +302,9 @@ class Bloxorz:
                 newCost = totalCost[str(current)] + 1
 
                 if str(next) not in totalCost and str(next) not in visited or newCost < totalCost[str(next)]:
-                    totalCost[str(next)] = newCost + self.heuristic(next)
+                    totalCost[str(next)] = newCost
                     priority = newCost + self.heuristic(next)
                     q.put(next, priority)
                     crt = str(current)
                     visited.append(crt)
+                    counter += 1
