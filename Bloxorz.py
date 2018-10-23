@@ -1,7 +1,7 @@
 # Bloxorz Class Implementation
 import Block
 from queue import PriorityQueue
-
+import math
 
 class Bloxorz:
 
@@ -173,8 +173,8 @@ class Bloxorz:
                     result.append([[coor1x, coor1y - 1], [coor2x, coor2y - 2], 0])
 
                 # check down
-                if self.checkTheTile(coor1x, coor1y + 1) and self.checkTheTile(coor2x, coor2y + 2):
-                    result.append([[coor1x, coor1y + 1], [coor2x, coor2y + 2], 0])
+                if self.checkTheTile(coor1x, coor1y + 2) and self.checkTheTile(coor2x, coor2y + 1):
+                    result.append([[coor1x, coor1y + 2], [coor2x, coor2y + 1], 0])
 
             else:
 
@@ -183,8 +183,8 @@ class Bloxorz:
                     result.append([[coor1x, coor1y - 2], [coor2x, coor2y - 1], 0])
 
                 # check down
-                if self.checkTheTile(coor1x, coor1y + 2) and self.checkTheTile(coor2x, coor2y + 1):
-                    result.append([[coor1x, coor1y + 2], [coor2x, coor2y + 1], 0])
+                if self.checkTheTile(coor1x, coor1y + 1) and self.checkTheTile(coor2x, coor2y + 2):
+                    result.append([[coor1x, coor1y + 1], [coor2x, coor2y + 2], 0])
 
             # check left
             if self.checkTheTile(coor1x - 1, coor1y) and self.checkTheTile(coor2x - 1, coor2y):
@@ -196,6 +196,12 @@ class Bloxorz:
 
         return result
 
+    def updateBoard(self, coor1, coor2, state):
+        self.clearOldPoints()
+        self.player.updatePlayer(coor1, coor2, state)
+        self.placeNewPoints()
+        self.printBoard()
+
     def UCS(self):
 
         print("---------------")
@@ -204,41 +210,87 @@ class Bloxorz:
         print("Starting...")
         print()
         self.checkState()
+        self.printBoard()
+        print("---------------")
 
-        queue = PriorityQueue()
+        q = PriorityQueue()
         goal = [self.goalPoint, self.goalPoint, 0]
         start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
         visited = [str(start)]
         totalCost = {str(start): 0}
 
-        queue.put(start, 0)  # start, total cost
-
-        while not queue.empty():
-            current = queue.get()
+        q.put(start, 0)  # start, total cost
+        while not q.empty():
+            current = q.get()
 
             if current == goal:
+                print("Solved in :", totalCost[str(goal)], "moves with UCS Algorithm.")
+                print("Current Board")
+                print()
+                self.updateBoard(goal[0], goal[1], goal[2])
+                print()
                 print("Finished")
-                print(current)
-                for i in totalCost:
-                    print(i)
+                break
 
-                self.printBoard()
+            for next in self.neighbors(current):
+                newCost = totalCost[str(current)] + 1
+                if str(next) not in totalCost and str(next) not in visited or newCost < totalCost[str(next)]:
+                    totalCost[str(next)] = newCost
+                    priority = newCost
+                    q.put(next, priority)
+                    crt = str(current)
+                    visited.append(crt)
+
+    def heuristic(self, next):
+        next1x = next[0][0]
+        next1y = next[0][1]
+        next2x = next[1][0]
+        next2y = next[1][1]
+        distance1 = math.sqrt(math.pow((self.goalPoint[0] - next1x), 2) + math.pow(int((self.goalPoint[1] - next1y)), 2))
+        distance2 = math.sqrt(math.pow((self.goalPoint[0] - next2x), 2) + math.pow(int((self.goalPoint[1] - next2y)), 2))
+
+        if distance1 <= distance2:
+            return int(distance1 -1.5)
+        else:
+            return int(distance2 -1.5)
+
+    def Astar(self):
+
+        print("---------------")
+        self.findStart()
+        print()
+        print("Starting...")
+        print()
+        self.checkState()
+        self.printBoard()
+        print("---------------")
+
+        q = PriorityQueue()
+        goal = [self.goalPoint, self.goalPoint, 0]
+        start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
+        visited = [str(start)]
+        totalCost = {str(start): 0}
+
+        q.put(start, 0)  # start, total cost
+        while not q.empty():
+            current = q.get()
+
+            if current == goal:
+                print("Solved in :", totalCost[str(goal)], "moves with A* Algorithm.")
+                print("Current Board")
+                print()
+                self.updateBoard(goal[0], goal[1], goal[2])
+                print()
+                print("Finished")
                 break
 
             for next in self.neighbors(current):
 
-                print()
                 newCost = totalCost[str(current)] + 1
 
                 if str(next) not in totalCost and str(next) not in visited or newCost < totalCost[str(next)]:
-                    totalCost[str(next)] = newCost
-                    priority = newCost
-                    queue.put(next, priority)
+                    totalCost[str(next)] = newCost + self.heuristic(next)
+                    priority = newCost + self.heuristic(next)
+                    q.put(next, priority)
                     crt = str(current)
                     visited.append(crt)
-                    self.clearOldPoints()
-                    self.player.updatePlayer(next[0], next[1], next[2])
-                    print(newCost)
-                    print(next)
-                    self.placeNewPoints()
-                    self.printBoard()
