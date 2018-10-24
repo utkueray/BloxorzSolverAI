@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 import psutil
 
-file = open('board.txt', 'r') # open board files
+file = open('test3.txt', 'r') # open board files
 boardData = [] # empty array to bi filled with data later
 boardData2 = [] # empty array to bi filled with data later
 
@@ -42,8 +42,6 @@ start_time = datetime.now()
 ucsResult = problem.UCS()
 problem.solution(ucsResult)
 end_time = datetime.now()
-print("Memory:", process.memory_info().rss)
-print('Duration: {}'.format(end_time - start_time))
 
 print("----------------------------------------------")
 
@@ -51,6 +49,14 @@ start_time2 = datetime.now()
 process2 = psutil.Process(os.getpid())
 astarResult = problem2.Astar()
 problem2.solution(astarResult)
-end_time = datetime.now()
-print("Memory:", process2.memory_info().rss)
-print('Duration: {}'.format(end_time - start_time2))
+end_time2 = datetime.now()
+
+print("Results:")
+print("----------------------------------")
+print("UCS Time and Memory Usage")
+print('Duration: {}'.format(end_time.microsecond - start_time.microsecond), "MicroSeconds")
+print("Memory:", process.memory_percent().__round__(5), "%")
+print()
+print("A* Time and Memory Usage")
+print("Memory:", process2.memory_percent().__round__(5), "%")
+print('Duration: {}'.format(end_time2.microsecond - start_time2.microsecond), "MicroSeconds")

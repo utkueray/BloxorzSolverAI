@@ -1,8 +1,6 @@
 # Bloxorz Class Implementation
 import Block
 from queue import PriorityQueue
-import math
-import time
 
 class Bloxorz:
 
@@ -232,21 +230,22 @@ class Bloxorz:
 
         if next[2] == 0:
             distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
-            return distance-1
+            return distance
         elif next[2] == 1:
             if self.goalPoint[0]-next1x < self.goalPoint[0]-next2x:
                 distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
-                return distance-1
+                return distance
             else:
                 distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
-                return distance-1
+                return distance
         elif next[2] == 2:
             if self.goalPoint[1]-next1y < self.goalPoint[1]-next2y:
                 distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
-                return distance-1
+                return distance
             else:
                 distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
-                return distance-1
+                return distance
+
 
     def Astar(self):
         q = PriorityQueue()
@@ -295,3 +294,4 @@ class Bloxorz:
             print()
 
         print("Done")
+        print()
