@@ -1,14 +1,24 @@
-
 # AI Assignment#1 - Solve Bloxorz with A* Search Algorithm
+# Mehmet Utku Eray
+# 23883
+# ueray@sabanciuniv.edu
 
 import Bloxorz as Bz
 from datetime import datetime
 import os
 import psutil
 
-file = open('test3.txt', 'r') # open board files
-boardData = [] # empty array to bi filled with data later
-boardData2 = [] # empty array to bi filled with data later
+file = open('board.txt', 'r')
+# possible names for file check
+"""
+board.txt
+test1.text
+test2.txt
+test3.txt
+test4.txt
+"""
+boardData = [] # empty array to be filled with data later
+boardData2 = [] # empty array to be filled with data later
 
 while True:
     line = file.readline()
@@ -19,12 +29,17 @@ while True:
 
 file.close() # close file
 
-problem = Bz.Bloxorz(boardData) # construct a game object
+# construct a game objects
+problem = Bz.Bloxorz(boardData)
 problem2 = Bz.Bloxorz(boardData2)
+
+#run initial functions
 problem.findStart()
 problem2.findStart()
 problem.checkState()
 problem2.checkState()
+
+#Print Goal and Current Position for start
 print("Goal Coordinate:", problem.goalPoint)
 if problem.startingState == 0:
     print("Player Coordinate: ", problem.blockPoint)
@@ -35,9 +50,11 @@ elif problem.startingState == 1:
 elif problem.startingState == 2:
     print("Player Coordinates: ", problem.blockPoint, problem.blockPoint2)
     print("Starting Horizontal and Parallel to Y")
-print()
-process = psutil.Process(os.getpid())
 
+print()
+
+# Execute UCS and Calculate Time and Memory
+process = psutil.Process(os.getpid())
 start_time = datetime.now()
 ucsResult = problem.UCS()
 problem.solution(ucsResult)
@@ -45,12 +62,14 @@ end_time = datetime.now()
 
 print("----------------------------------------------")
 
+# Execute A* and Calculate Time and Memory
 start_time2 = datetime.now()
 process2 = psutil.Process(os.getpid())
 astarResult = problem2.Astar()
 problem2.solution(astarResult)
 end_time2 = datetime.now()
 
+# Print Results of Time and Memory Usage
 print("Results:")
 print("----------------------------------")
 print("UCS Time and Memory Usage")

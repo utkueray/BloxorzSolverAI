@@ -8,7 +8,7 @@ class Player:
         self.currentPoint2 = startCoor2
         self.state = state
 
-    def updatePlayer(self, newCoor1, newCoor2, state): # update player
+    def updatePlayer(self, newCoor1, newCoor2, state): # update player data
         self.currentPoint = newCoor1
         self.currentPoint2 = newCoor2
         self.state = state

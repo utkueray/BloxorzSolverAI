@@ -7,16 +7,20 @@ class Bloxorz:
     def __init__(self, matrix):
 
         # necessary variables for class functions
+
         self.board = matrix  # copy board
         self.xLen = len(self.board[0])  # length of x
         self.yLen = len(self.board)  # length of y
-        self.startingState = 0
-        self.goalPoint = []
+        self.startingState = 0  # Starting State Initializer
+        self.goalPoint = []  # Goal Coordinates Initializer
+
     def findStart(self):
 
         counter = 0
 
-        for y in range(0, self.yLen):  # determine the goal point
+        # find the goal point
+
+        for y in range(0, self.yLen):
             for x in range(0, self.xLen):
                 if self.board[y][x] == "G":
                     goalX = x
@@ -24,6 +28,8 @@ class Bloxorz:
                     break
 
         self.goalPoint = [goalX, goalY]  # goal coordinate
+
+        # find the starting position and determine its orientation
 
         for y in range(0, self.yLen):  # determine the block coordinate
             for x in range(0, self.xLen):
@@ -46,10 +52,14 @@ class Bloxorz:
             else:
                 self.player = Block.Player(self.blockPoint, self.blockPoint2, 2)  # state 2 horizontal
 
+    # printing the current board
+
     def printBoard(self):
 
         for y in range(0, self.yLen):
             print(self.board[y])
+
+    # checking if a tile is safe to move
 
     def checkTheTile(self, x, y):
 
@@ -61,7 +71,10 @@ class Bloxorz:
                     return True
             return False
 
+    # checking the current orientation of the block
+
     def checkState(self):
+
         if self.blockPoint == self.blockPoint:
             self.startingState = 0  # vertical
         elif self.blockPoint[0] + 1 == self.blockPoint2[0] or self.blockPoint[0] - 1 == self.blockPoint2[0]:
@@ -69,7 +82,10 @@ class Bloxorz:
         elif self.blockPoint[1] + 1 == self.blockPoint2[1] or self.blockPoint[1] - 1 == self.blockPoint2[1]:
             self.startingState = 2  # horizontal and parallel to y
 
+    # clearing the S' on the board to be filled later
+
     def clearOldPoints(self):  # deletes the old player position
+
         cleanBoard = list(self.board[self.player.currentPoint[1]])
         cleanBoard2 = list(self.board[self.player.currentPoint2[1]])
 
@@ -79,7 +95,9 @@ class Bloxorz:
         self.board[self.player.currentPoint[1]] = "".join(cleanBoard)
         self.board[self.player.currentPoint2[1]] = "".join(cleanBoard2)
 
-    def placeNewPoints(self):  # adds the updated player position
+    # adding the player position to the board
+
+    def placeNewPoints(self):
 
         cleanBoard = list(self.board[self.player.currentPoint[1]])
         cleanBoard2 = list(self.board[self.player.currentPoint2[1]])
@@ -92,6 +110,9 @@ class Bloxorz:
         self.board[self.player.currentPoint[1]] = "".join(cleanBoard)
         self.board[self.player.currentPoint2[1]] = "".join(cleanBoard2)
         self.board[self.goalPoint[1]] = "".join(cleanBoard3)
+
+    # checking if a neighbor of the current tile is movable
+    # returns the tiles that are movable
 
     def neighbors(self, current):
 
@@ -122,12 +143,12 @@ class Bloxorz:
 
             # check right
             if self.checkTheTile(coor1x + 1, coor1y) and self.checkTheTile(coor2x + 2, coor2y):
-                 result.append([[coor1x + 1, coor1y], [coor2x + 2, coor2y], 1])
+                result.append([[coor1x + 1, coor1y], [coor2x + 2, coor2y], 1])
 
         elif current[2] == 1:  # state = 1
             # check up
             if self.checkTheTile(coor1x, coor1y - 1) and self.checkTheTile(coor2x, coor2y - 1):
-                 result.append([[coor1x, coor1y - 1], [coor2x, coor2y - 1], 1])
+                result.append([[coor1x, coor1y - 1], [coor2x, coor2y - 1], 1])
 
             # check down
             if self.checkTheTile(coor1x, coor1y + 1) and self.checkTheTile(coor2x, coor2y + 1):
@@ -175,7 +196,7 @@ class Bloxorz:
 
             # check left
             if self.checkTheTile(coor1x - 1, coor1y) and self.checkTheTile(coor2x - 1, coor2y):
-               result.append([[coor1x - 1, coor1y], [coor2x - 1, coor2y], 2])
+                result.append([[coor1x - 1, coor1y], [coor2x - 1, coor2y], 2])
 
             # check right
             if self.checkTheTile(coor1x + 1, coor1y) and self.checkTheTile(coor2x + 1, coor2y):
@@ -183,19 +204,24 @@ class Bloxorz:
 
         return result
 
+    # function that contains other helper function to update the board for current situation
+
     def updateBoard(self, coor1, coor2, state):
+
         self.clearOldPoints()
         self.player.updatePlayer(coor1, coor2, state)
         self.placeNewPoints()
         self.printBoard()
 
+    # calculating Uniform Cost Search and returning the best path according to this algorithm
+
     def UCS(self):
-        q = PriorityQueue()
-        goal = [self.goalPoint, self.goalPoint, 0]
-        start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
-        visited = {}
-        totalCost = {str(start): 0}
-        counter = 0
+
+        q = PriorityQueue()  # our que
+        goal = [self.goalPoint, self.goalPoint, 0]  # goal point
+        start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]  # starting point
+        visited = {}  # dictionary for visited tiles
+        totalCost = {str(start): 0}  # total cost for tiles
 
         q.put(start, 0)  # start, total cost
         while not q.empty():
@@ -212,17 +238,22 @@ class Bloxorz:
                 path.reverse()
                 return path
 
+            # check the current tile if exists
+            # if not, add the tile to both dictionaries and que
+            # if exists and has lower cost, then update the cost
             for next in self.neighbors(current):
-                newCost = totalCost[str(current)] + 1
+
+                newCost = totalCost[str(current)] + 1 # new cost for the next tile
                 if str(next) not in totalCost and str(next) not in visited or newCost < totalCost[str(next)]:
                     totalCost[str(next)] = newCost
                     priority = newCost
                     q.put(next, priority)
                     visited[str(next)] = current
-                    counter +=1
 
+    # heuristic function calculator for A* search
 
     def heuristic(self, next):
+
         next1x = next[0][0]
         next1y = next[0][1]
         next2x = next[1][0]
@@ -232,28 +263,29 @@ class Bloxorz:
             distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
             return distance
         elif next[2] == 1:
-            if self.goalPoint[0]-next1x < self.goalPoint[0]-next2x:
+            if self.goalPoint[0] - next1x < self.goalPoint[0] - next2x:
                 distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
                 return distance
             else:
                 distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
                 return distance
         elif next[2] == 2:
-            if self.goalPoint[1]-next1y < self.goalPoint[1]-next2y:
+            if self.goalPoint[1] - next1y < self.goalPoint[1] - next2y:
                 distance = abs(self.goalPoint[0] - next1x) + abs(self.goalPoint[1] - next1y)
                 return distance
             else:
                 distance = abs(self.goalPoint[0] - next2x) + abs(self.goalPoint[1] - next2y)
                 return distance
 
+    # calculating A* Search and returning the best path according to this algorithm
 
     def Astar(self):
-        q = PriorityQueue()
-        goal = [self.goalPoint, self.goalPoint, 0]
-        start = [self.player.currentPoint, self.player.currentPoint2, self.player.state]
-        visited = {}
-        totalCost = {str(start): 0}
-        counter = 0
+
+        q = PriorityQueue() # our que
+        goal = [self.goalPoint, self.goalPoint, 0] # goal point
+        start = [self.player.currentPoint, self.player.currentPoint2, self.player.state] # starting point
+        visited = {} # dictionary for visited tiles
+        totalCost = {str(start): 0} # total cost for tiles
 
         q.put(start, 0)  # start, total cost
         while not q.empty():
@@ -273,16 +305,21 @@ class Bloxorz:
 
             for next in self.neighbors(current):
 
-                newCost = totalCost[str(current)] + 1
+                newCost = totalCost[str(current)] + 1 # new cost for the next tile
 
+                # check the current tile if exists
+                # if not, add the tile to both dictionaries and que
+                # if exists and has lower cost, then update the cost
                 if str(next) not in totalCost and str(next) not in visited or newCost < totalCost[str(next)]:
                     totalCost[str(next)] = newCost
                     priority = newCost + self.heuristic(next)
                     q.put(next, priority)
                     visited[str(next)] = current
-                    counter += 1
+
+    # printing the path
 
     def solution(self, path):
+
         counter = 0
         for movement in path:
             if counter == 0:
